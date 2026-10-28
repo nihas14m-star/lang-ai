@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "English Tutor AI",
+    "slug": "english-tutor-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "englishtutor",
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "package": "com.englishtutor.ai",
+      "adaptiveIcon": {
+        "backgroundColor": "#1B5E20",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "permissions": ["RECORD_AUDIO"],
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow English Tutor AI to use the microphone for speaking practice.",
+          "speechRecognitionPermission": "Allow English Tutor AI to use speech recognition so your spoken English can be transcribed and improved."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1B5E20",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 100
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

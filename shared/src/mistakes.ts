@@ -137,8 +137,9 @@ const HEURISTICS: Array<{
   fix: (m: RegExpMatchArray) => { corrected: string; explanation: string } | null;
 }> = [
   {
-    // "yesterday I go" / "last week he meet" — obvious past-tense misses
-    re: /\b(yesterday|last (?:night|week|month|year)|ago)\b[^.!?]*?\b(go|come|meet|eat|see|take|buy|write|speak|tell|get|give|make|drive|run|read)\b(?!\s+(?:to|the|a|an|my|his|her|our|their|your|its|him|her|them|it|home|there|here|out|up|down|back)\b)/i,
+    // "yesterday I go" / "last week he meet" — obvious past-tense misses.
+    // The optional "to" capture marks infinitives ("wanted to go") -> skipped in fix().
+    re: /\b(yesterday|last (?:night|week|month|year)|ago)\b[^.!?]*?\b(to\s+)?(go|come|meet|eat|see|take|buy|write|speak|tell|get|give|make|drive|run|read)\b/i,
     category: "tense",
     fix: (m) => {
       const table: Record<string, string> = {
@@ -147,7 +148,8 @@ const HEURISTICS: Array<{
         tell: "told", get: "got", give: "gave", make: "made", drive: "drove",
         run: "ran", read: "read",
       };
-      const verb = m[2]!.toLowerCase();
+      if (m[2]) return null; // infinitive ("wanted to go") — no error
+      const verb = m[3]!.toLowerCase();
       const past = table[verb];
       if (!past || verb === past) return null;
       return {

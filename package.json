@@ -1,1 +1,1 @@
-{"name": "english-tutor-ai", "private": true, "version": "1.0.0", "workspaces": ["shared", "backend"], "scripts": {"test": "npm run test --workspaces --if-present", "typecheck": "npm run typecheck --workspaces --if-present"}}
+{"name": "english-tutor-ai", "private": true, "version": "1.0.0", "workspaces": ["shared", "backend", "app"], "scripts": {"test": "npm run test --workspaces --if-present", "typecheck": "npm run typecheck --workspaces --if-present"}}
