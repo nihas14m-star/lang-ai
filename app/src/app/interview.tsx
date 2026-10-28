@@ -229,9 +229,7 @@ export default function Interview() {
             listening={asr.listening}
             onPress={() => {
               if (asr.listening) {
-                asr.stop();
-                const text = (asr.finalTranscript || asr.transcript).trim();
-                if (text) void answer(text);
+                void asr.stopAndCollect().then((text) => { if (text) void answer(text); });
               } else void asr.start();
             }}
             volume={asr.volume}

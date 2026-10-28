@@ -29,6 +29,8 @@ export interface AsrState {
   volume: number;
   start: () => Promise<void>;
   stop: () => void;
+  /** Stop listening and resolve with the final transcript once recognition ends. */
+  stopAndCollect: (timeoutMs?: number) => Promise<string>;
   reset: () => void;
 }
 
@@ -51,6 +53,7 @@ export function useSpeechRecognition(lang = "en-US"): AsrState {
   const audioEnd = useRef<number | null>(null);
   const finals = useRef<string[]>([]);
   const lastPartial = useRef("");
+  const endWaiters = useRef<Array<() => void>>([]);
 
   useEffect(() => {
     try {
@@ -111,6 +114,9 @@ export function useSpeechRecognition(lang = "en-US"): AsrState {
 
   useSpeechRecognitionEvent("end", () => {
     setListening(false);
+    // Wake any stopAndCollect() waiters.
+    for (const w of endWaiters.current) w();
+    endWaiters.current = [];
     // Compute metrics from the real volume timeline.
     const end = audioEnd.current ?? Date.now();
     const start = audioStart.current ?? end;
@@ -184,6 +190,32 @@ export function useSpeechRecognition(lang = "en-US"): AsrState {
     }
   }, []);
 
+  const stopAndCollect = useCallback((timeoutMs = 4000): Promise<string> => {
+    return new Promise((resolve) => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        const collected = finals.current.join(" ").trim() || lastPartial.current.trim();
+        resolve(collected);
+      };
+      // Safety timeout in case the end event never arrives.
+      const timer = setTimeout(() => {
+        endWaiters.current = endWaiters.current.filter((w) => w !== finish);
+        finish();
+      }, timeoutMs);
+      endWaiters.current.push(() => {
+        clearTimeout(timer);
+        finish();
+      });
+      try {
+        ExpoSpeechRecognitionModule.stop();
+      } catch {
+        finish();
+      }
+    });
+  }, []);
+
   const reset = useCallback(() => {
     setTranscript("");
     setFinalTranscript("");
@@ -194,6 +226,6 @@ export function useSpeechRecognition(lang = "en-US"): AsrState {
 
   return {
     supported, listening, transcript, finalTranscript, error,
-    permissionDenied, metrics, volume, start, stop, reset,
+    permissionDenied, metrics, volume, start, stop, stopAndCollect, reset,
   };
 }

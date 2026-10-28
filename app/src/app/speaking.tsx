@@ -38,8 +38,8 @@ export default function Speaking() {
 
   useEffect(() => () => asr.stop(), [asr]);
 
-  const analyze = async () => {
-    const transcript = (asr.finalTranscript || asr.transcript).trim();
+  const analyze = async (transcriptOverride?: string) => {
+    const transcript = (transcriptOverride ?? asr.finalTranscript ?? asr.transcript).trim();
     if (!transcript || busy) return;
     setBusy(true);
     setError(null);
@@ -106,7 +106,14 @@ export default function Speaking() {
 
         <MicButton
           listening={asr.listening}
-          onPress={() => (asr.listening ? (asr.stop(), void analyze()) : (setAnalysis(null), void asr.start()))}
+          onPress={() => {
+            if (asr.listening) {
+              void asr.stopAndCollect().then((text) => { if (text) void analyze(text); });
+            } else {
+              setAnalysis(null);
+              void asr.start();
+            }
+          }}
           volume={asr.volume}
           accessibilityLabel="Record your speaking"
         />

@@ -43,12 +43,16 @@ export default function Diagnostic() {
   const setAnswer = (id: string, value: string) =>
     setAnswers((prev) => ({ ...prev, [id]: value }));
 
-  const next = () => {
+  const next = async () => {
     stopSpeaking();
-    asr.stop();
-    if (item && asr.finalTranscript.trim()) {
-      setSpeakingMetrics((prev) => ({ ...prev, [item.id]: asr.metrics }));
-      setAnswer(item.id, asr.finalTranscript);
+    if (item && (asr.finalTranscript.trim() || asr.transcript.trim())) {
+      const spoken = await asr.stopAndCollect(3000).catch(() => asr.finalTranscript);
+      if (spoken) {
+        setSpeakingMetrics((prev) => ({ ...prev, [item.id]: asr.metrics }));
+        setAnswer(item.id, spoken);
+      }
+    } else {
+      asr.stop();
     }
     if (index + 1 >= ASSESSMENT_ITEMS.length) {
       void finish();

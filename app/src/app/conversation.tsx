@@ -241,9 +241,7 @@ export default function Conversation() {
             listening={asr.listening}
             onPress={() => {
               if (asr.listening) {
-                asr.stop();
-                if (asr.finalTranscript.trim()) void send(asr.finalTranscript);
-                else if (asr.transcript.trim()) void send(asr.transcript);
+                void asr.stopAndCollect().then((text) => { if (text) void send(text); });
               } else {
                 void asr.start();
               }
