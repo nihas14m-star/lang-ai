@@ -38,7 +38,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     nvidia: {
       apiKey: env.NVIDIA_API_KEY?.trim() || undefined,
       baseUrl: env.NVIDIA_BASE_URL?.trim() || "https://integrate.api.nvidia.com/v1",
-      model: env.NVIDIA_MODEL?.trim() || "meta/llama-3.3-70b-instruct",
+      model: env.NVIDIA_MODEL?.trim() || "nvidia/nemotron-3.5-lightning-30b-a3b",
     },
     openai: {
       apiKey: env.OPENAI_API_KEY?.trim() || undefined,

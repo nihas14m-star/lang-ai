@@ -37,16 +37,26 @@ cd backend
 cp .env.example .env          # then edit: add NVIDIA_API_KEY
 npm install
 npm start                     # http://localhost:8787
+npm run live:test             # optional: one real structured call against the configured provider
 ```
 
 - `NVIDIA_API_KEY` — get one at https://build.nvidia.com (free tier available).
-  With no keys configured the backend automatically runs a deterministic
+- Default model: `nvidia/nemotron-3.5-lightning-30b-a3b` (verified working; older
+  `meta/llama-3.3-70b-instruct` reached end-of-life on NIM). If you change the model,
+  run `npm run live:probe` to check availability on your account — NIM accounts can
+  only invoke a subset of catalogued models.
+- With no keys configured the backend automatically runs a deterministic
   rule-based tutor so every endpoint still works (responses are labeled
   `degraded: true`).
 - Set `API_TOKEN` to require `Authorization: Bearer <token>` on all endpoints.
 - Never commit `.env`. Keys only ever live server-side.
 
 ## App setup (Android)
+
+> **Path requirement:** build from a path WITHOUT spaces (e.g. `C:\dev\english-tutor-ai`).
+> The Android NDK/CMake toolchain fails on paths containing spaces, and OneDrive-synced
+> folders cause file locking during builds. If your project lives under a spaced or
+> OneDrive path, move or clone it to a local space-free directory for `gradlew` builds.
 
 ```bash
 cd app

@@ -44,6 +44,12 @@ export class NVIDIAProvider implements AIProvider {
     if (request.jsonMode) {
       body.response_format = { type: "json_object" };
     }
+    // Nemotron 3.x reasoning models spend max_tokens on reasoning first,
+    // which can leave the JSON content empty. Disable thinking for
+    // structured extraction (verified against NIM, Oct 2026).
+    if ((this.config.model ?? "").toLowerCase().includes("nemotron")) {
+      body.chat_template_kwargs = { thinking: false };
+    }
     const json = await fetchJson(
       `${baseUrl}/chat/completions`,
       {
