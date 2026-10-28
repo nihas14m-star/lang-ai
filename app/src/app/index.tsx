@@ -28,6 +28,7 @@ export default function Home() {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const { profile, mission, missionCompleted, streak, connection, ready } = useAppStore();
+  const vocabCount = useAppStore((s) => s.vocabCount);
   const refreshMission = useAppStore((s) => s.refreshMission);
   const checkConnection = useAppStore((s) => s.checkConnection);
   const summary = selectLevelSummary(profile);
@@ -55,7 +56,7 @@ export default function Home() {
     );
   }
 
-  const dueBadge = useAppStore.getState().vocabCount > 0;
+  const dueBadge = vocabCount > 0;
   const minutesDone = mission
     ? mission.activities.filter((_, i) => missionCompleted.includes(`${i}`)).reduce((a, x) => a + x.minutes, 0)
     : 0;

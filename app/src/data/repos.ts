@@ -400,20 +400,37 @@ export const missionsRepo = {
     const rows = await db.getAllAsync<{ date_key: string; completed_json: string }>(
       "SELECT date_key, completed_json FROM mission_log ORDER BY date_key DESC LIMIT 120",
     );
-    let current = 0;
     const day = 86_400_000;
-    // Count consecutive days (from today backwards) with at least one completed activity.
-    const expected = new Date().setHours(0, 0, 0, 0);
-    for (let i = 0; i < rows.length; i++) {
-      const r = rows[i]!;
-      const completed = parse<string[]>(r.completed_json, []);
-      const [y, m, d] = r.date_key.split("-").map(Number);
-      const dayMs = new Date(y!, (m ?? 1) - 1, d).setHours(0, 0, 0, 0);
-      if (completed.length === 0) break;
-      if (dayMs === expected - i * day) current++;
-      else break;
+    const parseKey = (key: string): number => {
+      const [y, m, d] = key.split("-").map(Number);
+      return new Date(y!, (m ?? 1) - 1, d).setHours(0, 0, 0, 0);
+    };
+    const active = rows.filter((r) => parse<string[]>(r.completed_json, []).length > 0);
+    if (active.length === 0) return { current: 0, best: 0 };
+
+    // Current streak: consecutive active days ending today (or yesterday).
+    const today = new Date().setHours(0, 0, 0, 0);
+    let current = 0;
+    const activeDays = new Set(active.map((r) => parseKey(r.date_key)));
+    let cursor = today;
+    if (!activeDays.has(cursor)) cursor -= day; // streak survives if yesterday was done
+    while (activeDays.has(cursor)) {
+      current++;
+      cursor -= day;
     }
-    const best = rows.reduce((acc, r) => Math.max(acc, parse<string[]>(r.completed_json, []).length > 0 ? 1 : 0), current);
+
+    // Best streak: longest run of consecutive active days.
+    const sorted = [...activeDays].sort((a, b) => a - b);
+    let best = 1;
+    let run = 1;
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i]! - sorted[i - 1]! === day) {
+        run++;
+        best = Math.max(best, run);
+      } else {
+        run = 1;
+      }
+    }
     return { current, best };
   },
 };

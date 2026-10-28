@@ -90,7 +90,17 @@ export function createApp(env: NodeJS.ProcessEnv = process.env): Express {
     try {
       const body = AssessmentRequestSchema.parse(req.body);
       // 1. Score objective sections locally (deterministic, no AI).
-      const objectiveResponses: AssessmentResponse[] = (req.body?.objectiveResponses ?? []) as AssessmentResponse[];
+      // Harden the raw objectiveResponses: only well-formed string answers accepted.
+      const raw = req.body?.objectiveResponses;
+      const objectiveResponses: AssessmentResponse[] = Array.isArray(raw)
+        ? raw
+            .filter((r: unknown): r is { itemId: unknown; answer: unknown } =>
+              typeof r === "object" && r !== null &&
+              typeof (r as { itemId?: unknown }).itemId === "string" &&
+              typeof (r as { answer?: unknown }).answer === "string")
+            .slice(0, 100)
+            .map((r) => ({ itemId: (r as { itemId: string }).itemId.slice(0, 40), answer: (r as { answer: string }).answer.slice(0, 10_000) }))
+        : [];
       const { sectionScores } = scoreObjectiveResponses(objectiveResponses);
       // 2. AI scores open sections when available.
       const { ai, meta } = await assessOpen(body, deps);
