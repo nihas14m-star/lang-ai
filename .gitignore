@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+.expo/
+android/.gradle/
+android/app/build/
+android/build/
+*.apk
+*.aab
+
+# Environment / secrets — never commit real credentials
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Local databases
+*.db
+*.sqlite
