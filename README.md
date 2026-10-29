@@ -53,10 +53,14 @@ npm run live:test             # optional: one real structured call against the c
 
 ## App setup (Android)
 
-> **Path requirement:** build from a path WITHOUT spaces (e.g. `C:\dev\english-tutor-ai`).
-> The Android NDK/CMake toolchain fails on paths containing spaces, and OneDrive-synced
-> folders cause file locking during builds. If your project lives under a spaced or
-> OneDrive path, move or clone it to a local space-free directory for `gradlew` builds.
+> **Path/toolchain requirement (verified on this machine):** the Android NDK build
+> fails on Windows when (a) the path contains spaces and (b) object paths exceed
+> 260 chars (ninja 1.10 bundled with the SDK CMake is not long-path aware).
+> Fixes applied here: the canonical repo lives at `C:\e` (short, space-free), and
+> the SDK's `cmake\3.22.1\bin\ninja.exe` was replaced with ninja 1.13.2 (long-path
+> aware, from `pip install ninja`). Junctions at the OneDrive folder and
+> `C:\dev\english-tutor-ai` keep the original paths working for editing; always
+> run Gradle from `C:\e\app\android`.
 
 ```bash
 cd app
