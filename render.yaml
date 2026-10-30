@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: lang-ai-backend
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start --workspace=backend
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: NVIDIA_BASE_URL
+        value: https://integrate.api.nvidia.com/v1
+      - key: NVIDIA_MODEL
+        value: nvidia/nemotron-3.5-lightning-30b-a3b
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      - key: OPENROUTER_MODEL
+        value: openai/gpt-4o-mini
+      - key: AI_PROVIDER_ORDER
+        value: ""
+      - key: PORT
+        value: "8787"
+      - key: API_TOKEN
+        sync: false
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "60000"
+      - key: RATE_LIMIT_MAX
+        value: "60"
+      - key: DICTIONARY_API_BASE
+        value: "https://api.dictionaryapi.dev/api/v2/entries/en"

@@ -1,34 +1,49 @@
-/**
- * Root layout: boots the local database + store, checks backend connectivity.
- * Navigation is a flat stack with Home as the hub — intentionally simple so
- * the visual layer can be redesigned freely.
- */
+import React, { useEffect, useState } from 'react';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { ThemeProvider } from '../core/ThemeContext';
+import { loadFonts, FontFamilies } from '../core/fonts';
+import { useTheme } from '../core/ThemeContext';
 
-import React, { useEffect } from "react";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { useAppStore } from "../state/store";
-import { useTheme } from "../core/theme";
+const fontMap = {
+  'Urbanist_400Regular': require('../../assets/fonts/Urbanist-Regular.ttf'),
+  'Urbanist_500Medium': require('../../assets/fonts/Urbanist-Medium.ttf'),
+  'Urbanist_600SemiBold': require('../../assets/fonts/Urbanist-SemiBold.ttf'),
+  'Urbanist_700Bold': require('../../assets/fonts/Urbanist-Bold.ttf'),
+  'SpaceMono_400Regular': require('../../assets/fonts/SpaceMono-Regular.ttf'),
+  'SpaceMono_500Medium': require('../../assets/fonts/SpaceMono-Medium.ttf'),
+  'Caveat_400Regular': require('../../assets/fonts/Caveat-Regular.ttf'),
+  'Caveat_700Bold': require('../../assets/fonts/Caveat-Bold.ttf'),
+};
 
 export default function RootLayout() {
-  const bootstrap = useAppStore((s) => s.bootstrap);
-  const checkConnection = useAppStore((s) => s.checkConnection);
-  const theme = useTheme();
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
-    void bootstrap();
-    void checkConnection();
-    const interval = setInterval(() => void checkConnection(), 60_000);
-    return () => clearInterval(interval);
-  }, [bootstrap, checkConnection]);
+    loadFonts().then(setFontsLoaded);
+  }, []);
+
+  if (!fontsLoaded) {
+    return (
+      <ThemeProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: '#FDFBF7' },
+          }}
+        >
+          <Stack.Screen name="index" />
+        </Stack>
+      </ThemeProvider>
+    );
+  }
 
   return (
-    <>
-      <StatusBar style="auto" />
+    <ThemeProvider>
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: theme.background },
+          contentStyle: { backgroundColor: '#FDFBF7' },
         }}
       >
         <Stack.Screen name="index" />
@@ -46,6 +61,10 @@ export default function RootLayout() {
         <Stack.Screen name="progress" />
         <Stack.Screen name="profile" />
       </Stack>
-    </>
+    </ThemeProvider>
   );
+}
+
+export function useFontsLoaded() {
+  return true; // Fonts loaded at root level
 }
